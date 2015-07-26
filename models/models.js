@@ -32,6 +32,7 @@ var sequelize = new Sequelize(DB_name, user, pwd,
  // 	storage: "quiz.sqlite"}
  // 	);
 
+// Importar definicion de la tabla Quiz
 var quiz_path = path.join(__dirname,'quiz');
 var Quiz = sequelize.import(quiz_path);
 
