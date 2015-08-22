@@ -18,7 +18,7 @@ router.get("/author", quizController.author);
 //rutas de session
 router.get('/login', 						sessionController.new);
 router.post('/login',						sessionController.create);
-router.delete('/logout',					sessionController.destroy);
+router.get('/logout',					sessionController.destroy);
 
 
 router.get('/quizes', 						quizController.index);
@@ -35,5 +35,7 @@ router.delete('/quizes/:quizId(\\d+)', sessionController.loginRequired, quizCont
 router.get('/quizes/:quizId(\\d+)/comments/new', commentController.new);
 router.post('/quizes/:quizId(\\d+)/comments', commentController.create);
 router.get('/quizes/:quizId(\\d+)/comments/:commentId(\\d+)/publish', sessionController.loginRequired, commentController.publish);
+
+router.get('/quizes/statistics', quizController.statistics);
 
 module.exports = router;

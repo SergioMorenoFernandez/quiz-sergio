@@ -125,3 +125,31 @@ req.quiz.destroy()
 exports.author = function(req,res){
 	res.render('author', { errors: []});
 }
+
+// GET /quizes/statistics
+
+exports.statistics = function(req, res) {
+
+  var statistics = {totalQuizes:0,
+                    totalComments:0,
+                    avgCommentsQuiz:0,
+                    numQuizesWithoutComments:0,
+                    numQuizesWithComments:0};
+
+  models.Quiz.count().then(function(countQuizes) {
+    statistics.totalQuizes = countQuizes;
+    models.Comment.count().then(function(countComments) {
+      statistics.totalComments = countComments;
+      statistics.avgCommentsQuiz = 
+                 (statistics.totalComments/statistics.totalQuizes).toFixed(2);
+      models.Quiz.count({include: [{ model: models.Comment, required:true }],
+                         distinct: true})
+      .then(function(countWithComments) {
+        statistics.numQuizesWithComments = countWithComments;
+        statistics.numQuizesWithoutComments = statistics.totalQuizes - countWithComments;
+        res.render('quizes/statistics', {statistics: statistics, errors: []});
+      })
+    })
+  })
+
+};
