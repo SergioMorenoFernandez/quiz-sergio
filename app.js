@@ -5,7 +5,7 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var methodOverride = require('method-override');
-
+var session = require('express-session')
 
 var partials = require('express-partials');
 var routes = require('./routes/index');
@@ -23,9 +23,38 @@ app.use(favicon(__dirname + '/public/favicon.ico'));
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded());
-app.use(cookieParser());
+app.use(cookieParser('Quiz Sergio'));
 app.use(methodOverride('_method'));
+app.use(session());
 app.use(express.static(path.join(__dirname, 'public')));
+
+// Session
+app.use(function(req,res, next){
+  // guardar ruta de vuelta login/logout
+  if (!req.path.match(/\/login|\/logout/)){ 
+    req.session.redir = req.path;
+  }
+  res.locals.session = req.session; // hacer visible la sesión
+  next();
+});
+
+
+// Control de expiración de tiempo de sesión
+// La sesión se define por la existencia de req.session.user
+// Si pasan más de 2*60000 milisegundos desde la ultima vez, entonces
+// hacer logout y volver a path anterior a login
+app.use(function (req, res, next){
+  if (req.session.user) {
+    var tiempo = 0;
+    if (req.session.tiempo) {tiempo = new Date - req.session.tiempo;}
+    req.session.tiempo = new Date - 0;
+    if (tiempo > 120000){
+      delete req.session.tiempo;
+      delete req.session.user;
+      res.redirect(req.session.redir.toString());
+    } else next(); // continuar
+  } else next();
+});
 
 app.use('/', routes);
 
@@ -35,6 +64,8 @@ app.use(function(req, res, next) {
     err.status = 404;
     next(err);
 });
+
+
 
 // error handlers
 
